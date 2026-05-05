@@ -28,20 +28,17 @@ function DetalheProduto({ adicionarAoCarrinho }) {
           {/* Aqui você poderia adicionar miniaturas (thumbnails) no futuro */}
         </div>
 
-        {/* Coluna da Direita: Informações e Compra */}
         <div className="col-md-6 d-flex flex-column justify-content-center">
           <span className="text-muted mb-2">Categoria: Informática &gt; Notebooks</span>
           <BotaoVoltar />
           <h1 className="fw-bold mb-3">{produto.nome}</h1>
           
-          {/* Formatando o preço na hora de exibir */}
           <h2 className="text-success fw-bold display-6 mb-1">
             {produto.preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
           </h2>
           <p className="text-muted mb-4">{produto.parcelamento}</p>
 
           <div className="p-4 bg-light rounded-3 shadow-sm border">
-            {/* 3. Coloque o onClick no botão chamando a função */}
             <button 
               onClick={() => adicionarAoCarrinho(produto)} 
               className="btn btn-primary btn-lg w-100 fw-bold text-uppercase mt-3"

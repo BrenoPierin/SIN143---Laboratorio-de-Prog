@@ -13,7 +13,6 @@ function BotaoVoltar() {
       onClick={lidarComVoltar} 
       className="btn btn-outline-secondary btn-sm"
     >
-      {/* Seta do próprio texto/emoji */}
       ← Voltar
     </button>
   );

@@ -57,7 +57,6 @@ function Dashboard({ aoSair, qtdCarrinho }) {
               
               <li className="nav-item"><Link className="nav-link" to="/ofertas">Ofertas</Link></li>
               
-              <li className="nav-item"><a className="nav-link" href="#">Categorias</a></li>
             </ul>
             <div className="d-flex align-items-center gap-3">
               <Link to="/carrinho" className="text-white text-decoration-none fw-bold">
