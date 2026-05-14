@@ -1,30 +1,33 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { getProdutos } from '../hooks/API';
 
 function Ofertas() {
-  const produtosEmOferta = [
-    { 
-      id: 4, 
-      nome: "Teclado Mecânico Wireless", 
-      precoAntigo: "R$ 600,00",
-      precoNovo: "R$ 450,00",
-      desconto: "25%",
-      imagem: "https://placehold.co/400x300/dc3545/FFFFFF?text=Teclado" 
-    },
-    { 
-      id: 5, 
-      nome: "Mouse Gamer 16000 DPI", 
-      precoAntigo: "R$ 400,00",
-      precoNovo: "R$ 280,00",
-      desconto: "30%",
-      imagem: "https://placehold.co/400x300/dc3545/FFFFFF?text=Mouse" 
-    }
-  ];
+  const [produtos, setProdutos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState('');
+
+  useEffect(() => {
+    const carregar = async () => {
+      setLoading(true);
+      setErro('');
+      try {
+        // Traz todos os produtos ordenados por preço para mostrar os mais baratos como "oferta"
+        const data = await getProdutos('?ordering=preco');
+        // Filtra apenas produtos em estoque
+        setProdutos(data.filter((p) => p.em_estoque));
+      } catch (err) {
+        setErro(err.message || 'Erro ao carregar ofertas.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    carregar();
+  }, []);
 
   return (
     <div className="bg-light min-vh-100 pb-5">
-      
-      {/* Navbar Simplificada com Botão de Voltar */}
+      {/* Navbar */}
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow">
         <div className="container">
           <Link className="navbar-brand fw-bold" to="/">TechStore</Link>
@@ -38,36 +41,64 @@ function Ofertas() {
         {/* Banner de Ofertas */}
         <div className="p-4 mb-4 bg-danger text-white rounded-3 shadow-sm text-center">
           <h1 className="display-5 fw-bold">🔥 Queima de Estoque</h1>
-          <p className="fs-5">As melhores oportunidades com tempo limitado!</p>
+          <p className="fs-5">As melhores oportunidades — produtos em estoque ordenados pelo melhor preço!</p>
         </div>
 
-        {/* Grid de Produtos em Oferta */}
-        <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-          {produtosEmOferta.map((produto) => (
-            <div className="col" key={produto.id}>
-              <div className="card h-100 shadow border-danger">
-                {/* Badge de Desconto posicionado sobre a imagem */}
-                <div className="position-absolute top-0 end-0 p-2">
-                  <span className="badge bg-danger fs-6">-{produto.desconto}</span>
-                </div>
-                
-                <img src={produto.imagem} className="card-img-top" alt={produto.nome} />
-                
-                <div className="card-body d-flex flex-column">
-                  <h5 className="card-title fw-bold">{produto.nome}</h5>
-                  <div className="mb-3">
-                    <span className="text-decoration-line-through text-muted me-2">{produto.precoAntigo}</span>
-                    <span className="text-danger fs-4 fw-bold">{produto.precoNovo}</span>
+        {loading && (
+          <div className="text-center py-5">
+            <div className="spinner-border text-danger" role="status" />
+            <p className="mt-2 text-muted">Carregando ofertas...</p>
+          </div>
+        )}
+
+        {erro && <div className="alert alert-danger">{erro}</div>}
+
+        {!loading && !erro && produtos.length === 0 && (
+          <p className="text-center text-muted py-5">Nenhum produto em oferta no momento.</p>
+        )}
+
+        {!loading && !erro && (
+          <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {produtos.map((produto) => {
+              const preco = parseFloat(produto.preco);
+              const imagemUrl = produto.imagem_principal?.imagem_url;
+
+              return (
+                <div className="col" key={produto.id}>
+                  <div className="card h-100 shadow border-danger">
+                    {imagemUrl ? (
+                      <img
+                        src={imagemUrl}
+                        className="card-img-top"
+                        alt={produto.imagem_principal?.alt || produto.nome_produto}
+                        style={{ height: '200px', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <div
+                        className="card-img-top d-flex align-items-center justify-content-center bg-secondary text-white"
+                        style={{ height: '200px' }}
+                      >
+                        Sem imagem
+                      </div>
+                    )}
+
+                    <div className="card-body d-flex flex-column">
+                      <span className="badge bg-secondary mb-1 align-self-start">{produto.categoria_nome}</span>
+                      <h5 className="card-title fw-bold">{produto.nome_produto}</h5>
+                      <span className="text-danger fs-4 fw-bold mb-3">
+                        {preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      </span>
+
+                      <Link to={`/produto/${produto.id}`} className="btn btn-danger mt-auto w-100 fw-bold">
+                        Ver Detalhes
+                      </Link>
+                    </div>
                   </div>
-                  
-                  <Link to={`/produto/${produto.id}`} className="btn btn-danger mt-auto w-100 fw-bold">
-                    Ver Detalhes
-                  </Link>
                 </div>
-              </div>
-            </div>
-          ))}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
